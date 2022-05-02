@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>QoWatt Token - Stats</title>
+  </head>
+  <body>
+
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">NFT</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">QWT Price</th>
+                <th scope="col">Total</th>
+            </tr>
+        </thead>
+        <tbody id="body">
+        </tbody>
+    </table>
+
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
+	
+	<script type="text/javascript" language="javascript">
+		$(document).ready(function() {		
+			
+            function nbMint(nom, mintFunction, priceQWT){
+                var def = $.Deferred();
+                $.ajax({
+                    url: "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + mintFunction
+                }).then(function(data) {
+                   
+                    def.resolve();
+                }).fail(function(data){
+
+                    def.fail();
+                });		
+                return def.promise();
+            }
+
+            nbMint("Bronze", "mint_bronze_nft", 10000);
+            nbMint("Argent", "mint_argent_nft", 30000);
+            nbMint("Or", "mint_or_nft", 90000);
+            nbMint("Platine", "mint_platine_nft", 270000);
+            nbMint("Diamant", "mint_diamant_nft", 810000);
+            
+		});
+	</script>
+
+  </body>
+</html>
