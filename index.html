@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <title>QoWatt Token - Stats</title>
+    <style>
+        table, th, td {
+          border:1px solid black;
+        }
+        </style>
   </head>
   <body>
 
@@ -21,6 +26,7 @@
         </tbody>
     </table>
 
+
 	<script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
 	
 	<script type="text/javascript" language="javascript">
@@ -31,8 +37,8 @@
                 $.ajax({
                     url: "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + mintFunction
                 }).then(function(data) {
-                     $("#body").append("<tr><td>"+ nom + "</td><td>"+data+"</td><td>" + priceQWT + " QWT</td><td>"+data * priceQWT+"</td></tr>");
-                  
+                    $("#body").append("<tr><td>"+ nom + "</td><td>"+data+"</td><td>" + priceQWT + " QWT</td><td>"+data * priceQWT+"</td></tr>");
+                   
                     def.resolve();
                 }).fail(function(data){
 
@@ -46,7 +52,6 @@
             nbMint("Or", "mint_or_nft", 90000);
             nbMint("Platine", "mint_platine_nft", 270000);
             nbMint("Diamant", "mint_diamant_nft", 810000);
-            
 		});
 	</script>
 
