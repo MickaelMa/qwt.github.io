@@ -31,7 +31,8 @@
                 $.ajax({
                     url: "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + mintFunction
                 }).then(function(data) {
-                   
+                     $("#body").append("<tr><td>"+ nom + "</td><td>"+data+"</td><td>" + priceQWT + " QWT</td><td>"+data * priceQWT+"</td></tr>");
+                  
                     def.resolve();
                 }).fail(function(data){
 
