@@ -116,7 +116,7 @@
 						}, 0);
 						var scQWTCoin = data.find(el => el.address === "erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00").balance;
 						var qWTCoinMint = totalQWTCoin - scQWTCoin;
-						$("#nbQWTCoin").append("QWT Coin NFT minted : " + qWTCoinMint  + "/" + totalQWTCoin);
+						$("#nbQWTCoin").append("QWT Coin NFT claimed : " + qWTCoinMint  + "/" + totalQWTCoin);
 						def.resolve();
 					}).fail(function(data){
 						def.fail();
