@@ -9,6 +9,10 @@
 			table, th, td {
 				border:1px solid black;
 			}
+
+			.text-right {
+				text-align: right
+			}
 		</style>
 	</head>
 	<body>
@@ -24,13 +28,20 @@
 			<thead>
 				<tr>
 					<th scope="col">NFT</th>
-					<th scope="col">Quantity</th>
 					<th scope="col">Price ($QWT)</th>
+					<th scope="col">Minted</th>
 					<th scope="col">Total ($QWT)</th>
 				</tr>
 			</thead>
 			<tbody id="body">
 			</tbody>
+			<tfoot>
+				<tr>
+					<th scope="row" colspan="2">Total</td>
+					<th id="sumNFT" class="text-right"></td>
+					<th id="sumQWT" class="text-right"></td>
+				</tr>
+			</tfoot>
 		</table>
 		
 		<div>
@@ -68,13 +79,15 @@
 							// ne rien faire
 						}
 					}
-					fetchData(startDateTimestamp,endDateTimestamp );
+					fetchData(startDateTimestamp,endDateTimestamp);
 				});
 
 				// init page
 				$("#endDate").val( new Date().toISOString().split('T')[0]);
 				$("#fetchData").click();
 				nbQWTCoinMint();
+				var sumQWT = 0;
+				var sumNFT = 0;
 				
 				function fetchData(startTimestamp, endTimestamp){
 					$("#body").empty();
@@ -97,7 +110,13 @@
 					$.ajax({
 						url: urlAPI
 					}).then(function(data) {
-						$("#body").append("<tr><td>"+ nom + "</td><td>"+data+"</td><td>" + priceQWT + "</td><td>"+data * priceQWT+"</td></tr>");
+						// addition à la volée
+						sumQWT += data * priceQWT;
+						sumNFT += parseInt(data);
+			
+						$("#sumQWT").text(new Intl.NumberFormat('fr-FR').format(sumQWT));
+						$("#sumNFT").text(new Intl.NumberFormat('fr-FR').format(sumNFT));
+						$("#body").append("<tr><td>"+ nom + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(priceQWT)+"</td><td class='text-right'>" + data + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(data * priceQWT)+"</td></tr>");
 						def.resolve();
 					}).fail(function(data){
 						def.fail();
