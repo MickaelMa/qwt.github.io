@@ -43,7 +43,11 @@
 				</tr>
 			</tfoot>
 		</table>
-		
+	
+		<div>
+			<p id="percent"></p>
+		</div>		
+
 		<div>
 			<p id="nbQWTCoin"></p>
 		</div>
@@ -91,12 +95,14 @@
 				nbQWTCoinMint();
 				var sumQWT = 0;
 				var sumNFT = 0;
+				var percentQWTUse = 0;
 				
 				function fetchData(startTimestamp, endTimestamp){
 					// reinitialisation des variables
 					$("#body").empty();
 					sumQWT = 0;
 					sumNFT = 0;
+					percentQWTUse = 0;
 					// recuperation des stats nft
 					nbMint("Bronze", "mint_bronze_nft", 10000, startTimestamp, endTimestamp);
 					nbMint("Argent", "mint_argent_nft", 30000, startTimestamp, endTimestamp);
@@ -120,9 +126,11 @@
 						// addition à la volée
 						sumQWT += data * priceQWT;
 						sumNFT += parseInt(data);
+						percentQWTUse = (sumQWT) / (444000000*0.8);
 			
 						$("#sumQWT").text(new Intl.NumberFormat('fr-FR').format(sumQWT));
 						$("#sumNFT").text(new Intl.NumberFormat('fr-FR').format(sumNFT));
+						$("#percent").text("$QWT used for minting (reference : supply * 0,8) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUse));
 						$("#body").append("<tr><td>"+ nom + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(priceQWT)+"</td><td class='text-right'>" + data + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(data * priceQWT)+"</td></tr>");
 						def.resolve();
 					}).fail(function(data){
