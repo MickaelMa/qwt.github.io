@@ -1,59 +1,132 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<head>
+		<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>QoWatt Token - Stats</title>
-    <style>
-        table, th, td {
-          border:1px solid black;
-        }
-        </style>
-  </head>
-  <body>
+		<title>QoWatt Token - Stats</title>
+		<style>
+			table, th, td {
+				border:1px solid black;
+			}
+		</style>
+	</head>
+	<body>
 
-    <table>
-        <thead>
-            <tr>
-                <th scope="col">NFT</th>
-                <th scope="col">Quantity</th>
-                <th scope="col">QWT Price</th>
-                <th scope="col">Total</th>
-            </tr>
-        </thead>
-        <tbody id="body">
-        </tbody>
-    </table>
+		<label for="startDate">Stats between </input>
+		<input id="startDate" type="date">
+		<label for="endDate">and </input>
+		<input id="endDate" type="date">
+		</br>
+		<button id="fetchData">Fetch data</button>
+
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">NFT</th>
+					<th scope="col">Quantity</th>
+					<th scope="col">Price ($QWT)</th>
+					<th scope="col">Total ($QWT)</th>
+				</tr>
+			</thead>
+			<tbody id="body">
+			</tbody>
+		</table>
+		
+		<div>
+			<p id="nbQWTCoin"></p>
+		</div>
+
+		<script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
+		
+		<script type="text/javascript" language="javascript">
+			$(document).ready(function() {
+								
+				$("#fetchData").click(function(e){
+					e.preventDefault();
+					
+					var startDate = $("#startDate").val();
+					var startDateTimestamp = null;
+					if (startDate !== null && startDate.length != 0) {
+						try {
+							startDate = startDate.split("-");
+							var newDate = new Date(startDate[0], startDate[1] -1, startDate[2]);
+							startDateTimestamp = newDate.getTime()/1000;
+						} catch (error){
+							// ne rien faire
+						}
+					}
+
+					var endDate = $("#endDate").val();
+					var endDateTimestamp = null;
+					if (endDate !== null && endDate.length != 0) {
+						try {
+							endDate = endDate.split("-");
+							var newDate = new Date(endDate[0], endDate[1] -1, endDate[2]);
+							endDateTimestamp = newDate.getTime()/1000;
+						} catch (error){
+							// ne rien faire
+						}
+					}
+					fetchData(startDateTimestamp,endDateTimestamp );
+				});
+
+				// init page
+				$("#endDate").val( new Date().toISOString().split('T')[0]);
+				$("#fetchData").click();
+				nbQWTCoinMint();
+				
+				function fetchData(startTimestamp, endTimestamp){
+					$("#body").empty();
+					nbMint("Bronze", "mint_bronze_nft", 10000, startTimestamp, endTimestamp);
+					nbMint("Argent", "mint_argent_nft", 30000, startTimestamp, endTimestamp);
+					nbMint("Or", "mint_or_nft", 90000, startTimestamp, endTimestamp);
+					nbMint("Platine", "mint_platine_nft", 270000, startTimestamp, endTimestamp);
+					nbMint("Diamant", "mint_diamant_nft", 810000,startTimestamp, endTimestamp);
+				}
+				
+				function nbMint(nom, mintFunction, priceQWT, startTimestamp, endTimestamp){
+					var def = $.Deferred();
+					var urlAPI = "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + mintFunction;
+					if (startTimestamp !== null) {
+						urlAPI += "&after="+ startTimestamp;
+					}
+					if (endTimestamp !== null) {
+						urlAPI += "&before="+ endTimestamp;
+					}
+					$.ajax({
+						url: urlAPI
+					}).then(function(data) {
+						$("#body").append("<tr><td>"+ nom + "</td><td>"+data+"</td><td>" + priceQWT + "</td><td>"+data * priceQWT+"</td></tr>");
+						def.resolve();
+					}).fail(function(data){
+						def.fail();
+					});		
+					return def.promise();
+				}
+
+				function nbQWTCoinMint(){
+					var def = $.Deferred();
+					var urlAPI = "https://api.elrond.com/nfts/QWTCOINS-27203b-01/accounts?size=10000";
+					$.ajax({
+						url: urlAPI
+					}).then(function(data) {
+						var totalQWTCoin = data.reduce(function (sum, tax) {
+							return parseInt(sum) + parseInt(tax.balance);
+						}, 0);
+						var scQWTCoin = data.find(el => el.address === "erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00").balance;
+						var qWTCoinMint = totalQWTCoin - scQWTCoin;
+						$("#nbQWTCoin").append("QWT Coin NFT minted : " + qWTCoinMint  + "/" + totalQWTCoin);
+						def.resolve();
+					}).fail(function(data){
+						def.fail();
+					});		
+					return def.promise();
+				}
 
 
-	<script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
-	
-	<script type="text/javascript" language="javascript">
-		$(document).ready(function() {		
-			
-            function nbMint(nom, mintFunction, priceQWT){
-                var def = $.Deferred();
-                $.ajax({
-                    url: "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + mintFunction
-                }).then(function(data) {
-                    $("#body").append("<tr><td>"+ nom + "</td><td>"+data+"</td><td>" + priceQWT + " QWT</td><td>"+data * priceQWT+"</td></tr>");
-                   
-                    def.resolve();
-                }).fail(function(data){
-
-                    def.fail();
-                });		
-                return def.promise();
-            }
-
-            nbMint("Bronze", "mint_bronze_nft", 10000);
-            nbMint("Argent", "mint_argent_nft", 30000);
-            nbMint("Or", "mint_or_nft", 90000);
-            nbMint("Platine", "mint_platine_nft", 270000);
-            nbMint("Diamant", "mint_diamant_nft", 810000);
-		});
-	</script>
-
-  </body>
+				
+			});
+		</script>
+	</body>
 </html>
