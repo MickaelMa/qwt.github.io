@@ -83,14 +83,21 @@
 				});
 
 				// init page
-				$("#endDate").val( new Date().toISOString().split('T')[0]);
+				var tomorrow = new Date();
+				tomorrow.setDate(tomorrow.getDate() + 1);
+
+				$("#endDate").val(tomorrow.toISOString().split('T')[0]);
 				$("#fetchData").click();
 				nbQWTCoinMint();
 				var sumQWT = 0;
 				var sumNFT = 0;
 				
 				function fetchData(startTimestamp, endTimestamp){
+					// reinitialisation des variables
 					$("#body").empty();
+					sumQWT = 0;
+					sumNFT = 0;
+					// recuperation des stats nft
 					nbMint("Bronze", "mint_bronze_nft", 10000, startTimestamp, endTimestamp);
 					nbMint("Argent", "mint_argent_nft", 30000, startTimestamp, endTimestamp);
 					nbMint("Or", "mint_or_nft", 90000, startTimestamp, endTimestamp);
