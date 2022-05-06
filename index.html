@@ -78,6 +78,8 @@
 						try {
 							endDate = endDate.split("-");
 							var newDate = new Date(endDate[0], endDate[1] -1, endDate[2]);
+							newDate.setDate(newDate.getDate() + 1);
+
 							endDateTimestamp = newDate.getTime()/1000;
 						} catch (error){
 							// ne rien faire
@@ -87,10 +89,7 @@
 				});
 
 				// init page
-				var tomorrow = new Date();
-				tomorrow.setDate(tomorrow.getDate() + 1);
-
-				$("#endDate").val(tomorrow.toISOString().split('T')[0]);
+				$("#endDate").val(new Date().toISOString().split('T')[0]);
 				$("#fetchData").click();
 				nbQWTCoinMint();
 				var sumQWT = 0;
