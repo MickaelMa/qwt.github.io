@@ -24,6 +24,9 @@
 		</br>
 		<button id="fetchData">Fetch data</button>
 
+		<div>
+			<p id="fetchPeriod"></p>
+		</div>	
 		<table>
 			<thead>
 				<tr>
@@ -102,6 +105,12 @@
 					sumQWT = 0;
 					sumNFT = 0;
 					percentQWTUse = 0;
+
+					var startDate = new  Date(startTimestamp * 1000);
+					var endDate = new  Date(endTimestamp * 1000);
+
+					$("#fetchPeriod").text("Fetch data between " + new Intl.DateTimeFormat('default', { dateStyle: 'full', timeStyle: 'long' , timeZone :'Europe/Paris' }).format(startDate) + " and " + new Intl.DateTimeFormat('default', { dateStyle: 'full', timeStyle: 'long', timeZone :'Europe/Paris' }).format(endDate));
+					
 					// recuperation des stats nft
 					nbMint("Bronze", "mint_bronze_nft", 10000, startTimestamp, endTimestamp);
 					nbMint("Argent", "mint_argent_nft", 30000, startTimestamp, endTimestamp);
