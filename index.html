@@ -134,11 +134,13 @@
 						// addition à la volée
 						sumQWT += data * priceQWT;
 						sumNFT += parseInt(data);
-						percentQWTUse = (sumQWT) / (444000000*0.8);
+//Ajout des 4 nfts diamant montées hors token vendu
+
+						percentQWTUse = (sumQWT) / ((444000000*0.8) + (410000*4));
 			
 						$("#sumQWT").text(new Intl.NumberFormat('fr-FR').format(sumQWT));
 						$("#sumNFT").text(new Intl.NumberFormat('fr-FR').format(sumNFT));
-						$("#percent").text("$QWT used for minting (reference : supply * 0,8) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUse));
+						$("#percent").text("$QWT used for minting (reference : (supply * 0,8) + (410k * 4)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUse));
 						$("#body").append("<tr><td>"+ nom + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(priceQWT)+"</td><td class='text-right'>" + data + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(data * priceQWT)+"</td></tr>");
 						def.resolve();
 					}).fail(function(data){
