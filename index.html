@@ -61,8 +61,33 @@
 		<script src="https://code.jquery.com/jquery-3.6.0.js"></script> 
 		
 		<script type="text/javascript" language="javascript">
+
+			var conf = {"gen0": [
+									{"name": "Bronze",
+									"mintFunction": "mint_bronze_nft",
+									"price": 10000,
+									"count": 0},
+									{"name": "Argent",
+									"mintFunction": "mint_argent_nft",
+									"price": 30000,
+									"count": 0},
+									{"name": "Or",
+									"mintFunction": "mint_or_nft",
+									"price": 90000,
+									"count": 0},
+									{"name": "Platine",
+									"mintFunction": "mint_platine_nft",
+									"price": 270000,
+									"count": 0},
+									{"name": "Diamant",
+									"mintFunction": "mint_diamant_nft",
+									"price": 810000,
+									"count": 0}
+						]
+			};
+
 			$(document).ready(function() {
-								
+
 				$("#fetchData").click(function(e){
 					e.preventDefault();
 					
@@ -91,7 +116,7 @@
 							// ne rien faire
 						}
 					}
-					fetchData(startDateTimestamp,endDateTimestamp);
+					 fetchData(startDateTimestamp,endDateTimestamp);
 				});
 
 				// init page
@@ -103,7 +128,7 @@
 				var percentQWTUse = 0;
 				var percentQWTUseWithoutNFT = 0;
 				
-				function fetchData(startTimestamp, endTimestamp){
+				async function fetchData(startTimestamp, endTimestamp){
 					// reinitialisation des variables
 					$("#body").empty();
 					sumQWT = 0;
@@ -117,43 +142,72 @@
 					$("#fetchPeriod").text("Fetch data between " + new Intl.DateTimeFormat('default', { dateStyle: 'full', timeStyle: 'long' , timeZone :'Europe/Paris' }).format(startDate) + " and " + new Intl.DateTimeFormat('default', { dateStyle: 'full', timeStyle: 'long', timeZone :'Europe/Paris' }).format(endDate));
 					
 					// recuperation des stats nft
-					nbMint("Bronze", "mint_bronze_nft", 10000, startTimestamp, endTimestamp);
-					nbMint("Argent", "mint_argent_nft", 30000, startTimestamp, endTimestamp);
-					nbMint("Or", "mint_or_nft", 90000, startTimestamp, endTimestamp);
-					nbMint("Platine", "mint_platine_nft", 270000, startTimestamp, endTimestamp);
-					nbMint("Diamant", "mint_diamant_nft", 810000,startTimestamp, endTimestamp);
+					Promise.all([nbMint(conf['gen0'][0], startTimestamp, endTimestamp),
+					  			nbMint(conf['gen0'][1], startTimestamp, endTimestamp),
+					  			nbMint(conf['gen0'][2], startTimestamp, endTimestamp),
+					  			nbMint(conf['gen0'][3], startTimestamp, endTimestamp),
+					  			nbMint(conf['gen0'][4], startTimestamp, endTimestamp)])
+					.then(result => {
+						displayData()
+ 					});
 				}
 				
-				function nbMint(nom, mintFunction, priceQWT, startTimestamp, endTimestamp){
-					var def = $.Deferred();
-					var urlAPI = "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + mintFunction;
+				async function nbMint(gen0NFT, startTimestamp, endTimestamp) {
+					let result;
+
+					// preparation des variables
+					var urlAPI = "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + gen0NFT.mintFunction;
 					if (startTimestamp !== null) {
 						urlAPI += "&after="+ startTimestamp;
 					}
 					if (endTimestamp !== null) {
 						urlAPI += "&before="+ endTimestamp;
 					}
-					$.ajax({
-						url: urlAPI
-					}).then(function(data) {
+
+					try {
+						result = await $.ajax({
+							url: urlAPI,
+							type: 'GET'
+						});
+
+						// sauvegarde du resultat
+						gen0NFT.count = result;
+
+						return result;
+					} catch (error) {
+						console.error(error);
+					}
+				}
+
+				function displayData() {
+					// boucler sur la map pour modifier le tableau
+					conf['gen0'].forEach(function(element){
+						// affichage du tableau
+						$("#body").append("<tr><td>"+ element.name + "</td><td class='text-right'>"
+								+new Intl.NumberFormat('fr-FR').format(element.price)
+								+"</td><td class='text-right'>" 
+								+ element.count 
+								+ "</td><td class='text-right'>"
+								+ new Intl.NumberFormat('fr-FR').format(element.count * element.price)
+								+ "</td></tr>");
+
+						// calcul de la somme / pourcentage
+
 						// addition à la volée
-						sumQWT += data * priceQWT;
-						sumNFT += parseInt(data);
+						sumQWT += element.count * element.price;
+						sumNFT += parseInt(element.count);
 						//Ajout des 4 nfts diamant montées hors token vendu
 						percentQWTUse = (sumQWT) / (444000000*0.8);
 						percentQWTUseWithoutNFT = (sumQWT) / ((444000000*0.8) + (810000*4));
-			
-						$("#sumQWT").text(new Intl.NumberFormat('fr-FR').format(sumQWT));
-						$("#sumNFT").text(new Intl.NumberFormat('fr-FR').format(sumNFT));
-						$("#percent").text("$QWT used for minting (reference : (supply * 0,8)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUse));
-						$("#percentNFT").text("$QWT used for minting (reference : (supply * 0,8) + (810k * 4)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUseWithoutNFT));
-						$("#body").append("<tr><td>"+ nom + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(priceQWT)+"</td><td class='text-right'>" + data + "</td><td class='text-right'>"+new Intl.NumberFormat('fr-FR').format(data * priceQWT)+"</td></tr>");
-						def.resolve();
-					}).fail(function(data){
-						def.fail();
-					});		
-					return def.promise();
+					});
+
+					// rendu des calculs 
+					$("#sumQWT").text(new Intl.NumberFormat('fr-FR').format(sumQWT));
+					$("#sumNFT").text(new Intl.NumberFormat('fr-FR').format(sumNFT));
+					$("#percent").text("$QWT used for minting (reference : (supply * 0,8)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUse));
+					$("#percentNFT").text("$QWT used for minting (reference : (supply * 0,8) + (810k * 4)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUseWithoutNFT));
 				}
+
 
 				function nbQWTCoinMint(){
 					var def = $.Deferred();
