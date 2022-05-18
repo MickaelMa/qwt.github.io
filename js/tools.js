@@ -1,3 +1,16 @@
+async function getAPIResult(url) {
+    let result;
+    try {
+        result = await $.ajax({
+            url: url,
+            type: 'GET'
+        });
+        return result;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 //Returns monday and sunday of the week
 function getWeekRange(weekNo,yearNo) {
     let firstDayofYear = new Date(yearNo, 0, 1);

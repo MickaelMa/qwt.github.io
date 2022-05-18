@@ -67,6 +67,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script> 
 		<script src="./js/tools.js"></script>
 		<script src="./js/charts.js"></script> 
+		<script src="./js/stats.js"></script> 
 		
 		<script type="text/javascript" language="javascript">
 
@@ -130,7 +131,7 @@
 				// init page
 				$("#endDate").val(new Date().toISOString().split('T')[0]);
 				$("#fetchData").click();
-				nbQWTCoinMint();
+				getNbQWTCoinMint();
 				var sumQWT = 0;
 				var sumNFT = 0;
 				var percentQWTUse = 0;
@@ -150,43 +151,16 @@
 					$("#fetchPeriod").text("Fetch data between " + new Intl.DateTimeFormat('default', { dateStyle: 'full', timeStyle: 'long' , timeZone :'Europe/Paris' }).format(startDate) + " and " + new Intl.DateTimeFormat('default', { dateStyle: 'full', timeStyle: 'long', timeZone :'Europe/Paris' }).format(endDate));
 					
 					// recuperation des stats nft
-					Promise.all([nbMint(conf['gen0'][0], startTimestamp, endTimestamp),
-					  			nbMint(conf['gen0'][1], startTimestamp, endTimestamp),
-					  			nbMint(conf['gen0'][2], startTimestamp, endTimestamp),
-					  			nbMint(conf['gen0'][3], startTimestamp, endTimestamp),
-					  			nbMint(conf['gen0'][4], startTimestamp, endTimestamp)])
+					Promise.all([getNbMintGen0(conf['gen0'][0], startTimestamp, endTimestamp),
+								getNbMintGen0(conf['gen0'][1], startTimestamp, endTimestamp),
+								getNbMintGen0(conf['gen0'][2], startTimestamp, endTimestamp),
+								getNbMintGen0(conf['gen0'][3], startTimestamp, endTimestamp),
+								getNbMintGen0(conf['gen0'][4], startTimestamp, endTimestamp)])
 					.then(result => {
 						displayData()
  					});
 				}
 				
-				async function nbMint(gen0NFT, startTimestamp, endTimestamp) {
-					let result;
-
-					// preparation des variables
-					var urlAPI = "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00/transactions/count?status=success&function=" + gen0NFT.mintFunction;
-					if (startTimestamp !== null) {
-						urlAPI += "&after="+ startTimestamp;
-					}
-					if (endTimestamp !== null) {
-						urlAPI += "&before="+ endTimestamp;
-					}
-
-					try {
-						result = await $.ajax({
-							url: urlAPI,
-							type: 'GET'
-						});
-
-						// sauvegarde du resultat
-						gen0NFT.count = result;
-
-						return result;
-					} catch (error) {
-						console.error(error);
-					}
-				}
-
 				function displayData() {
 					// boucler sur la map pour modifier le tableau
 					conf['gen0'].forEach(function(element){
@@ -204,8 +178,8 @@
 						// addition à la volée
 						sumQWT += element.count * element.price;
 						sumNFT += parseInt(element.count);
-						//Ajout des 4 nfts diamant montées hors token vendu
 						percentQWTUse = (sumQWT) / (444000000*0.8);
+						// Ajout des 4 nfts diamant obtenus hors token vendu
 						percentQWTUseWithoutNFT = (sumQWT) / ((444000000*0.8) + (810000*4));
 					});
 
@@ -215,64 +189,9 @@
 					$("#percent").text("$QWT used for minting (reference : (supply * 0,8)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUse));
 					$("#percentNFT").text("$QWT used for minting (reference : (supply * 0,8) + (810k * 4)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUseWithoutNFT));
 				
-					const ctx = document.getElementById('nftRepartition').getContext('2d');
-
-					const data = {
-						labels: [conf['gen0'][0].name, conf['gen0'][1].name, conf['gen0'][2].name,conf['gen0'][3].name, conf['gen0'][4].name],
-						datasets: [{
-							label: 'Nb NFT',
-							data: [conf['gen0'][0].count, conf['gen0'][1].count, conf['gen0'][2].count,conf['gen0'][3].count, conf['gen0'][4].count],
-							backgroundColor: [
-									'rgba(255, 99, 132, 0.5)',
-									'rgba(54, 162, 235, 0.5)',
-									'rgba(255, 206, 86, 0.5)',
-									'rgba(153, 102, 255, 0.5)',
-									'rgba(75, 192, 192, 0.5)'
-									
-							],
-							hoverOffset: 4
-						}]
-						};
-
-					const myChart = new Chart(ctx, {
-						type: 'doughnut',
-						data: data,
-						options: {
-							responsive: true,
-							maintainAspectRatio: false,
-							plugins: {
-								legend: {
-									position: 'top',
-								},
-								title: {
-									display: true,
-									text: 'NFT Gen 0 Distribution'
-								}
-							}
-						}
-					});
-
+					// affichage des graphes suite à la recuperation des données
+					displayNFTRepartition();
 					displayNFTRepartitionByQWTPrice();
-
-				}
-
-				function nbQWTCoinMint(){
-					var def = $.Deferred();
-					var urlAPI = "https://api.elrond.com/nfts/QWTCOINS-27203b-01/accounts?size=10000";
-					$.ajax({
-						url: urlAPI
-					}).then(function(data) {
-						var totalQWTCoin = data.reduce(function (sum, tax) {
-							return parseInt(sum) + parseInt(tax.balance);
-						}, 0);
-						var scQWTCoin = data.find(el => el.address === "erd1qqqqqqqqqqqqqpgq0jdfyzt2afk3dc35y9s8q0t0qk2tc56a83gq6ftr00").balance;
-						var qWTCoinMint = totalQWTCoin - scQWTCoin;
-						$("#nbQWTCoin").append("QWT Coin NFT claimed : " + qWTCoinMint  + "/" + totalQWTCoin);
-						def.resolve();
-					}).fail(function(data){
-						def.fail();
-					});		
-					return def.promise();
 				}
 			});
 		</script>
