@@ -1,8 +1,8 @@
-async function getNbMintGen1(gen1NFT, startTimestamp, endTimestamp) {
+async function getDetailMintGen1(gen1NFT, startTimestamp, endTimestamp) {
     let result;
 
     // preparation des variables
-    var urlAPI = "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgqjd0meg3aurn2utx5evcu87fvyfscs5cs83gqmeefmu/transactions/count?status=success&function=" + gen1NFT.mintFunction;
+    var urlAPI = "https://api.elrond.com/accounts/erd1qqqqqqqqqqqqqpgqjd0meg3aurn2utx5evcu87fvyfscs5cs83gqmeefmu/transactions?status=success&size=10000";
     if (startTimestamp !== null) {
         urlAPI += "&after="+ startTimestamp;
     }
@@ -11,10 +11,39 @@ async function getNbMintGen1(gen1NFT, startTimestamp, endTimestamp) {
     }
 
     // sauvegarde du resultat 
-    gen1NFT.count = await getAPIResult(urlAPI);
-     
-}
+    transactions = await getAPIResult(urlAPI); 
 
+    // Extraction du nom des fonctions
+    var listMintFonction = gen1NFT.reduce(function(accumulateur, valCourante) {
+        if(accumulateur.indexOf(valCourante.mintFunction) === -1) {
+            accumulateur.push(valCourante.mintFunction);
+          }
+        return accumulateur;
+      }, []);
+
+    console.log('nb transaction : ' + transactions.length);
+    transactions.forEach(function(element){
+        // verifie si la fonction est une fonction de mint (function in array)
+        var indexMintFunction = listMintFonction.indexOf(element.function);
+        if (indexMintFunction != -1) {
+            // si oui, 
+            // on ajoute +1 dans le decompte des nfts
+            gen1NFT[indexMintFunction].count += 1;
+
+            // on boucle sur les transfers de token
+            element.action.arguments.transfers.forEach(function(tr){
+                // QOWATTCOIN - // on ajoute le nombre de coin utilisé
+                if (tr.ticker === "QWTCOINS-27203b") {
+                    gen1NFT[indexMintFunction].qowattCoinUse += parseInt(tr.value);
+                }
+                // QWT - // on ajoute le nombre de token utilisé
+                if (tr.ticker === "QWT") {
+                    gen1NFT[indexMintFunction].qwtUse += (parseInt(tr.value) / Math.pow(10, tr.decimals));
+                }
+            });
+        }
+    });
+}
 
 async function getNbMintGen0(gen0NFT, startTimestamp, endTimestamp) {
     let result;
@@ -32,8 +61,6 @@ async function getNbMintGen0(gen0NFT, startTimestamp, endTimestamp) {
     gen0NFT.count = await getAPIResult(urlAPI);
      
 }
-
-
 
 // recuperation des NFT QWTCoin
 async function getNbQWTCoinMint(){
