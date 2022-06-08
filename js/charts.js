@@ -13,7 +13,6 @@ function displayNFTRepartitionByQWTPrice() {
                     'rgba(255, 206, 86, 0.5)',
                     'rgba(153, 102, 255, 0.5)',
                     'rgba(75, 192, 192, 0.5)'
-                    
             ],
             hoverOffset: 4
         }]
@@ -38,14 +37,14 @@ function displayNFTRepartitionByQWTPrice() {
     });
 }
 
-function displayNFTRepartition() {
-    const ctx = document.getElementById('nftRepartition').getContext('2d');
+function displayNFTRepartition(gen, title, id) {
+    const ctx = document.getElementById(id).getContext('2d');
 
     const data = {
-        labels: [conf['gen0'][0].name, conf['gen0'][1].name, conf['gen0'][2].name,conf['gen0'][3].name, conf['gen0'][4].name],
+        labels: [gen[0].name, gen[1].name, gen[2].name,gen[3].name, gen[4].name],
         datasets: [{
             label: 'Nb NFT',
-            data: [conf['gen0'][0].count, conf['gen0'][1].count, conf['gen0'][2].count,conf['gen0'][3].count, conf['gen0'][4].count],
+            data: [gen[0].count, gen[1].count, gen[2].count, gen[3].count, gen[4].count],
             backgroundColor: [
                     'rgba(255, 99, 132, 0.5)',
                     'rgba(54, 162, 235, 0.5)',
@@ -70,7 +69,7 @@ function displayNFTRepartition() {
                 },
                 title: {
                     display: true,
-                    text: 'NFT Gen 0 Distribution'
+                    text: title
                 }
             }
         }

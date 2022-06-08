@@ -62,8 +62,8 @@
 		</div>
 
 		<div class="chart-container" style="position: relative; height:40vh; width:80vw">
-			<canvas id="nftRepartition"></canvas>
-			<canvas id="nftRepartitionQWT"></canvas>
+			<canvas id="nftRepartitionGen0"></canvas>
+			<canvas id="nftRepartitionGen1"></canvas>
 		</div>
 
 		<script src="./js/module/jquery-3.6.0.min.js"></script> 
@@ -261,8 +261,9 @@
 					$("#percentNFT").text("$QWT used for minting (reference : (supply * 0,8) + (810k * 4)) => " + new Intl.NumberFormat('fr-FR', { style: 'percent', minimumFractionDigits: '2'}).format(percentQWTUseWithoutNFT));
 				
 					// affichage des graphes suite à la recuperation des données
-					displayNFTRepartition();
-					displayNFTRepartitionByQWTPrice();
+					displayNFTRepartition(conf['gen0'], 'NFT Gen 0 Distribution', 'nftRepartitionGen0');
+					displayNFTRepartition(conf['gen1'], 'NFT Gen 1 Distribution', 'nftRepartitionGen1');
+					//displayNFTRepartitionByQWTPrice();
 				}
 			});
 		</script>
